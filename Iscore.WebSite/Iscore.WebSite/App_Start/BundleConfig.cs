@@ -9,7 +9,8 @@ namespace Iscore.WebSite
         public static void RegisterBundles(BundleCollection bundles)
         {
             bundles.Add(new ScriptBundle("~/bundles/jquery").Include(
-                        "~/Scripts/jquery-2.2.3.min.js"));
+                        "~/Scripts/jquery-2.2.3.min.js",
+                        "~/Scripts/dx.all.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/jqueryval").Include(
                         "~/Scripts/jquery.validate*"));
@@ -28,7 +29,9 @@ namespace Iscore.WebSite
                       "~/Content/bootstrap.css",
                       "~/Content/site.css",
                       "~/Content/AdminLTE.min.css",
-                      "~/Content/Skins/skin-blue.min.css"));
+                      "~/Content/Skins/skin-blue.min.css",
+                      "~/Content/dx.common.css",
+                      "~/Content/dx.light.css"));
         }
     }
 }
