@@ -1,0 +1,132 @@
+﻿
+@{
+    ViewBag.Title = "LookUp";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h2>LookUp</h2>
+
+<div id="lookUpGrid"></div>
+<div id="lookupContainer">
+    <div data-options="dxTemplate: { name: 'lookupTemplate' }">
+        <div class="dx-fieldset">
+            <div class="dx-field">
+                <div class="dx-field-label">Code</div>
+                <div class="dx-field-value"><div id="codeTextBox"></div></div></div>
+            </div>
+            <div class="dx-field">
+                <div class="dx-field-label">EntityName</div>
+                <div class="dx-field-value"><div id="entityNameTextBox"></div></div>
+            </div>
+            <div class="dx-field">
+                <div class="dx-field-label">Description</div>
+                <div class="dx-field-value"><div id="descriptionTextBox"></div></div>
+            </div>
+        </div>
+    </div></div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var lookups = new DevExpress.data.CustomStore({
+            load: function (loadOptions) {
+                var deferred = $.Deferred();
+
+                $.ajax({
+                    url: "@Url.Action("GetLookUps", "Admin")",
+                    success: function (result) {
+                        console.log(result);
+                        deferred.resolve(result.items, { totalCount: result.totalCount });
+                    },
+                    error: function () {
+                        deferred.reject("Data Loading Error");
+                    },
+                    timeout: 5000
+                });
+
+                return deferred.promise();
+            },
+
+            @*insert: function (values) {
+                var deferred = $.Deferred();
+                console.log(values);
+                $.ajax({
+                    url: "@Url.Action("AddEditLookUps", "Admin")",
+                    type: "POST",
+                    data: { code:values.Code, id:"1", temp:values },
+                    success: function (result) {
+                        console.log(result);
+                        deferred.resolve(result.key);
+                    },
+                    error: function () {
+                        deferred.reject("Data Updating Error");
+                    },
+                    timeout: 5000
+                });
+
+                return deferred.promise();
+            },*@
+        });
+
+        $("#codeTextBox").dxTextBox({}).dxValidator({
+            validationRules: [{
+                type: "required",
+                message: "Code Name is required."
+            }]
+        });
+
+        $("#entityNameTextBox").dxTextBox({}).dxValidator({
+            validationRules: [{
+                type: "required",
+                message: "Code Name is required."
+            }]
+        });
+
+        $("#descriptionTextBox").dxTextBox({
+            placeholder: "Description"
+        });
+
+
+        $("#lookUpGrid").dxDataGrid({
+            dataSource: {
+                store: lookups
+            },
+            columns: [
+                {
+                    dataField: "Id",
+                    visible: false
+                },
+                "EntityName",
+                "Code",
+                "Description",
+            ],
+            onToolbarPreparing: function (e) {
+                var toolbarItems = e.toolbarOptions.items;
+
+                toolbarItems.unshift({
+                    widget: "dxButton",
+                    location: "before",
+                    options: {
+                        text: "New",
+                        icon: "add",
+                        hint: "Add New LookUp",
+                        onClick: function (arg) {
+                            $("#lookupContainer").dxPopup("show");
+                        }
+                    }
+                });
+            }
+        }).dxDataGrid("instance");
+
+        $("#lookupContainer").dxPopup({
+            title: "Popup Title",
+            width: 500,
+            height: 350,
+            dragEnabled: false,
+            closeOnOutsideClick: false,
+            contentTemplate: "lookupTemplate"
+        });
+
+    });
+</script>

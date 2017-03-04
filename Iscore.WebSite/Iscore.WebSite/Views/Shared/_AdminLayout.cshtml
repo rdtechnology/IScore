@@ -10,6 +10,7 @@
     @Scripts.Render("~/bundles/bootstrap")
     @Scripts.Render("~/bundles/modernizr")
 
+    <script type="text/javascript" src="~/Scripts/dx.web.js"></script>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
     <!-- Ionicons -->
@@ -228,6 +229,7 @@
                     <li><a href="#"><i class="fa fa-link"></i> <span>Purchase Order</span></a></li>
                     <li><a href="#"><i class="fa fa-link"></i> <span>Supplier</span></a></li>
                     <li><a href="#"><i class="fa fa-link"></i> <span>User</span></a></li>
+                    <li><a href="@Url.Action("LookUp", "Admin")"><i class="fa fa-link"></i> <span>LookUp</span></a></li>
                     @*<li class="treeview">
                         <a href="#">
                             <i class="fa fa-link"></i> <span>Multilevel</span>
