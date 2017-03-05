@@ -1,4 +1,5 @@
-﻿using Iscore.WebSite.Models;
+﻿using Iscore.DataBase;
+using Iscore.WebSite.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,9 +30,9 @@ namespace Iscore.WebSite.Controllers
             {
                 using (var db = SiteUtil.NewDb)
                 {
-                    var lookup = db.LookUps.Where(x => x.IsActive.Value).ToList();
+                    var lookup = db.LookUps.Where(x => x.IsActive.Value).Select(x => new { Id = x.Id, EntityName = x.EntityName, Code = x.Code, Description = x.Description }).ToList();
 
-                    return Json(lookup, JsonRequestBehavior.AllowGet);
+                    return Json(new { data = lookup }, JsonRequestBehavior.AllowGet);
                 }
             }
             catch (Exception e)
@@ -42,21 +43,48 @@ namespace Iscore.WebSite.Controllers
         }
 
         [HttpPost]
-        public JsonResult AddEditLookUps(int id, string code, object temp)
+        public JsonResult AddEditLookUps(int id, string code, string entityName, string description)
         {
             try
             {
                 using (var db = SiteUtil.NewDb)
                 {
-                    var lookup = db.LookUps.Where(x => x.IsActive.Value).ToList();
+                    // add new lookup
+                    if (id == 0)
+                    {
+                        var newLookup = new LookUp()
+                        {
+                            Code = code,
+                            EntityName = entityName,
+                            Description = description,
+                            CreatedBy = "Admin",
+                            CreatedOn = DateTime.Now,
+                            UpdatedBy = "Admin",
+                            UpdatedOn = DateTime.Now,
+                            IsActive = true
+                        };
+                        db.LookUps.Add(newLookup);
+                    }
+                    // edit lookup
+                    else
+                    {
+                        var lookup = db.LookUps.Where(x => x.IsActive.Value && x.Id == id).FirstOrDefault();
+                        lookup.Code = code;
+                        lookup.EntityName = entityName;
+                        lookup.Description = description;
+                        lookup.UpdatedBy = "Admin";
+                        lookup.UpdatedOn = DateTime.Now;
+                        lookup.IsActive = true;
 
+                    }
+
+                    //db.SaveChanges();
                     return Json(new { Success = true });
                 }
             }
             catch (Exception e)
             {
-
-                throw;
+                return Json(new { Success = false, ErrorMessage = e.Message });
             }
         }
         #endregion

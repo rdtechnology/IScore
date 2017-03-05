@@ -9,21 +9,29 @@
 <div id="lookUpGrid"></div>
 <div id="lookupContainer">
     <div data-options="dxTemplate: { name: 'lookupTemplate' }">
-        <div class="dx-fieldset">
-            <div class="dx-field">
-                <div class="dx-field-label">Code</div>
-                <div class="dx-field-value"><div id="codeTextBox"></div></div></div>
+        <form id="lookupForm" >
+            <div class="dx-fieldset">
+                <input type="hidden" id="lookupId" />
+                <div class="dx-field">
+                    <div class="dx-field-label">Code</div>
+                    <div class="dx-field-value"><div id="codeTextBox" name=Code></div></div>
+                </div>
+                <div class="dx-field">
+                    <div class="dx-field-label">EntityName</div>
+                    <div class="dx-field-value"><div id="entityNameTextBox"></div></div>
+                </div>
+                <div class="dx-field">
+                    <div class="dx-field-label">Description</div>
+                    <div class="dx-field-value"><div id="descriptionTextBox"></div></div>
+                </div>
             </div>
-            <div class="dx-field">
-                <div class="dx-field-label">EntityName</div>
-                <div class="dx-field-value"><div id="entityNameTextBox"></div></div>
+            <div>
+                <div id="saveButton"></div>
+                <div id="cancelButton"></div>
             </div>
-            <div class="dx-field">
-                <div class="dx-field-label">Description</div>
-                <div class="dx-field-value"><div id="descriptionTextBox"></div></div>
-            </div>
-        </div>
-    </div></div>
+        </form>    
+    </div>
+</div>
 
 <script type="text/javascript">
 
@@ -36,10 +44,9 @@
                 $.ajax({
                     url: "@Url.Action("GetLookUps", "Admin")",
                     success: function (result) {
-                        console.log(result);
-                        deferred.resolve(result.items, { totalCount: result.totalCount });
+                        deferred.resolve(result.data, { totalCount: result.totalCount });
                     },
-                    error: function () {
+                    error: function (e) {
                         deferred.reject("Data Loading Error");
                     },
                     timeout: 5000
@@ -47,48 +54,10 @@
 
                 return deferred.promise();
             },
-
-            @*insert: function (values) {
-                var deferred = $.Deferred();
-                console.log(values);
-                $.ajax({
-                    url: "@Url.Action("AddEditLookUps", "Admin")",
-                    type: "POST",
-                    data: { code:values.Code, id:"1", temp:values },
-                    success: function (result) {
-                        console.log(result);
-                        deferred.resolve(result.key);
-                    },
-                    error: function () {
-                        deferred.reject("Data Updating Error");
-                    },
-                    timeout: 5000
-                });
-
-                return deferred.promise();
-            },*@
-        });
-
-        $("#codeTextBox").dxTextBox({}).dxValidator({
-            validationRules: [{
-                type: "required",
-                message: "Code Name is required."
-            }]
-        });
-
-        $("#entityNameTextBox").dxTextBox({}).dxValidator({
-            validationRules: [{
-                type: "required",
-                message: "Code Name is required."
-            }]
-        });
-
-        $("#descriptionTextBox").dxTextBox({
-            placeholder: "Description"
         });
 
 
-        $("#lookUpGrid").dxDataGrid({
+        var dataGrid = $("#lookUpGrid").dxDataGrid({
             dataSource: {
                 store: lookups
             },
@@ -100,6 +69,25 @@
                 "EntityName",
                 "Code",
                 "Description",
+                {
+                    width: 200,
+                    alignment: "center",
+                    cellTemplate: function (container, options) {
+                        $("<div />").dxButton({
+                            text: "Edit",
+                            onClick: function (e) {
+                                showLookUpPopUp(options.data)
+                            }
+                        }).appendTo(container);
+
+                        $("<div />").dxButton({
+                            text: "Delete",
+                            onClick: function (e) {
+                                //showLookUpPopUp(options.data)
+                            }
+                        }).appendTo(container);
+                    }
+                }
             ],
             onToolbarPreparing: function (e) {
                 var toolbarItems = e.toolbarOptions.items;
@@ -112,21 +100,122 @@
                         icon: "add",
                         hint: "Add New LookUp",
                         onClick: function (arg) {
-                            $("#lookupContainer").dxPopup("show");
+                            showLookUpPopUp("")
                         }
                     }
                 });
+
             }
         }).dxDataGrid("instance");
 
         $("#lookupContainer").dxPopup({
-            title: "Popup Title",
+            title: "LookUp",
             width: 500,
-            height: 350,
+            height: 400,
             dragEnabled: false,
             closeOnOutsideClick: false,
-            contentTemplate: "lookupTemplate"
-        });
+            contentTemplate: "lookupTemplate",
+            onContentReady: function (e) {
+                $("#codeTextBox").dxTextBox({
+                    value: null,
+                    placeholder: 'Code'
+                }).dxValidator({
+                    validationRules: [{
+                        type: "required",
+                        name: "Code"
+                    }]
+                });
 
+                $("#entityNameTextBox").dxTextBox({
+                    value: null,
+                    placeholder: 'Entity Name'
+                }).dxValidator({
+                    validationRules: [{
+                        type: "required",
+                        name: "EntityName"
+                    }]
+                });
+
+                $("#saveButton").dxButton({
+                    text: "Save",
+                    onClick: function (e) {
+                        var result = e.validationGroup.validate();
+                        console.log(result);
+
+                        if (result.isValid) {
+                            saveLookUp();
+                            $("#lookupContainer").dxPopup("hide");
+                            console.log("YES");
+                        }
+                    }
+                });
+
+                $("#descriptionTextBox").dxTextArea({
+                    height: 90,
+                    maxLength: 200,
+                    value: null
+                });
+
+
+                $("#cancelButton").dxButton({
+                    text: "Cancel",
+                    onClick: function (e) {
+                        //DevExpress.ui.notify("The OK button was clicked");
+                        $("#lookupContainer").dxPopup("hide");
+                    }
+                });
+            }
+        });
     });
+
+    function showLookUpPopUp(data) {
+        var lookup = data;
+        $("#lookupContainer").dxPopup("show");
+
+        var codeTextbox = $("#codeTextBox").dxTextBox({}).dxTextBox("instance");
+        codeTextbox.option("value", data.Code);
+
+        var entityNameTextbox = $("#entityNameTextBox").dxTextBox({}).dxTextBox("instance");
+        entityNameTextbox.option("value", data.EntityName);
+
+        var descriptionNameTextbox = $("#descriptionTextBox").dxTextBox({}).dxTextBox("instance");
+        descriptionNameTextbox.option("value", data.Description);
+
+        $("#lookupId").val(data.Id);
+    }
+
+    function saveLookUp() {
+        var codeTextbox = $("#codeTextBox").dxTextBox({}).dxTextBox("instance");
+        var code = codeTextbox.option("value");
+
+        var entityNameTextbox = $("#entityNameTextBox").dxTextBox({}).dxTextBox("instance");
+        var entityName = entityNameTextbox.option("value");
+
+        var descriptionNameTextbox = $("#descriptionTextBox").dxTextBox({}).dxTextBox("instance");
+        var description = descriptionNameTextbox.option("value");
+
+        var Id = $("#lookupId").val() == "" ? 0 : $("#lookupId").val();
+        console.log(Id);
+        $.ajax({
+            url: "@Url.Action("AddEditLookUps", "Admin")",
+            type: "POST",
+            data: { code: code, id: Id, entityName: entityName, description: description },
+            success: function (result) {
+                if (result.Success) {
+                    DevExpress.ui.notify("Saving is Successful.", "success", 3000);
+                    var dataGrid = $("#lookUpGrid").dxDataGrid("instance");
+                    dataGrid.refresh();
+                }
+                else {
+                    DevExpress.ui.notify(result.ErrorMessage, "error", 3000);
+                }
+                //deferred.resolve(result.key);
+            },
+            error: function (e) {
+                DevExpress.ui.notify("Saving is Fail.", "error", 3000);
+                //deferred.reject("Data Updating Error");
+            },
+            //timeout: 5000
+        });
+    }
 </script>
