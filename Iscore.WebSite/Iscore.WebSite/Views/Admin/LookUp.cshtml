@@ -178,7 +178,7 @@
         var entityNameTextbox = $("#entityNameTextBox").dxTextBox({}).dxTextBox("instance");
         entityNameTextbox.option("value", data.EntityName);
 
-        var descriptionNameTextbox = $("#descriptionTextBox").dxTextBox({}).dxTextBox("instance");
+        var descriptionNameTextbox = $("#descriptionTextBox").dxTextArea({}).dxTextBox("instance");
         descriptionNameTextbox.option("value", data.Description);
 
         $("#lookupId").val(data.Id);
@@ -191,7 +191,7 @@
         var entityNameTextbox = $("#entityNameTextBox").dxTextBox({}).dxTextBox("instance");
         var entityName = entityNameTextbox.option("value");
 
-        var descriptionNameTextbox = $("#descriptionTextBox").dxTextBox({}).dxTextBox("instance");
+        var descriptionNameTextbox = $("#descriptionTextBox").dxTextArea({}).dxTextBox("instance");
         var description = descriptionNameTextbox.option("value");
 
         var Id = $("#lookupId").val() == "" ? 0 : $("#lookupId").val();
