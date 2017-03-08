@@ -54,6 +54,24 @@
 
                 return deferred.promise();
             },
+
+            remove: function (key) {
+                var deferred = $.Deferred();
+                console.log(key);
+                $.ajax({
+                    url: "@Url.Action("DisableLookUp", "Admin")",
+                    method: "POST",
+                    data: { id: key },
+                    success: function (result) {
+                        deferred.resolve(key);
+                    },
+                    error: function (e) {
+                        deferred.reject("Data Loading Error");
+                    },
+                });
+
+                return deferred.promise();
+            }
         });
 
 
@@ -80,12 +98,12 @@
                             }
                         }).appendTo(container);
 
-                        $("<div />").dxButton({
-                            text: "Delete",
-                            onClick: function (e) {
-                                //showLookUpPopUp(options.data)
-                            }
-                        }).appendTo(container);
+                        //$("<div />").dxButton({
+                        //    text: "Delete",
+                        //    onClick: function (e) {
+                        //        lookups.remove(options.data.Id);
+                        //    }
+                        //}).appendTo(container);
                     }
                 }
             ],
@@ -145,7 +163,6 @@
                         if (result.isValid) {
                             saveLookUp();
                             $("#lookupContainer").dxPopup("hide");
-                            console.log("YES");
                         }
                     }
                 });

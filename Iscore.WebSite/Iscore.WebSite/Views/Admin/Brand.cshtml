@@ -1,0 +1,166 @@
+﻿
+@{
+    ViewBag.Title = "Brand";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h2>Brand</h2>
+
+<div id="brandGrid"></div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var brandStore = new DevExpress.data.CustomStore({
+            load: function (loadOptions) {
+                var deferred = $.Deferred();
+
+                $.ajax({
+                    url: "@Url.Action("GetAllBrands", "Admin")",
+                    success: function (result) {
+                        deferred.resolve(result.data, { totalCount: result.totalCount });
+                    },
+                    error: function (e) {
+                        deferred.reject("Data Loading Error");
+                    },
+                    timeout: 5000
+                });
+
+                return deferred.promise();
+            },
+
+            byKey: function (key) {
+                var d = new $.Deferred();
+
+                $.ajax({
+                    url: "@Url.Action("GetBrand", "Admin")",
+                    success: function (result) {
+                        deferred.resolve(result.data, { totalCount: result.totalCount });
+                    },
+                    error: function (e) {
+                        deferred.reject("Data Loading Error");
+                    },
+                    timeout: 5000
+                });
+
+                return d.promise();
+            },
+
+            insert: function (values) {
+                var deferred = $.Deferred();
+
+                $.ajax({
+                    url: "@Url.Action("AddEditBrand", "Admin")",
+                    method: "POST",
+                    data: { id: key },
+                    success: function (result) {
+                        deferred.resolve(key);
+                    },
+                    error: function (e) {
+                        deferred.reject("Data Loading Error");
+                    },
+                });
+
+                return deferred.promise();
+            },
+
+            update: function (key, values) {
+                var deferred = $.Deferred();
+
+                $.ajax({
+                    url: "@Url.Action("AddEditBrand", "Admin")",
+                    method: "POST",
+                    data: { id: key },
+                    success: function (result) {
+                        deferred.resolve(key);
+                    },
+                    error: function (e) {
+                        deferred.reject("Data Loading Error");
+                    },
+                });
+
+                return deferred.promise();
+            },
+
+            remove: function (key) {
+                var deferred = $.Deferred();
+
+                $.ajax({
+                    url: "@Url.Action("DisableBrand", "Admin")",
+                    method: "POST",
+                    data: { id: key },
+                    success: function (result) {
+                        deferred.resolve(key);
+                    },
+                    error: function (e) {
+                        deferred.reject("Data Loading Error");
+                    },
+                });
+
+                return deferred.promise();
+            }
+        });
+
+        var dataGrid = $("#brandGrid").dxDataGrid({
+            dataSource: {
+                store: brandStore
+            },
+            columns: [
+                {
+                    dataField: "Id",
+                    visible: false
+                },
+                "Code",
+                "Name",
+                "Description",
+                {
+                    width: 200,
+                    alignment: "center",
+                    cellTemplate: function (container, options) {
+                        $("<div />").dxButton({
+                            text: "Edit",
+                            onClick: function (e) {
+                                //showLookUpPopUp(options.data)
+                            }
+                        }).appendTo(container);
+
+                        $("<div />").dxButton({
+                            text: "Disable",
+                            onClick: function (e) {
+                                //lookups.remove(options.data.Id);
+                                var result = DevExpress.ui.dialog.confirm("Are you sure?", "Disable");
+                                result.done(function (dialogResult) {
+                                    if (dialogResult)
+                                        DevExpress.ui.notify("Confirmed", "success", 2000);
+                                    else
+                                        DevExpress.ui.notify("Canceled", "error", 2000);
+                                });
+                            }
+                        }).appendTo(container);
+                    }
+                }
+            ],
+            onToolbarPreparing: function (e) {
+                var toolbarItems = e.toolbarOptions.items;
+
+                toolbarItems.unshift({
+                    widget: "dxButton",
+                    location: "before",
+                    options: {
+                        text: "New",
+                        icon: "add",
+                        hint: "Add New Brand",
+                        onClick: function (arg) {
+                            //showLookUpPopUp("")
+                        }
+                    }
+                });
+
+            }
+        }).dxDataGrid("instance");
+
+
+    });
+</script>
+

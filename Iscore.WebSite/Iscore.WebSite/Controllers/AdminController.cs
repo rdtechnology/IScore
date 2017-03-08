@@ -19,7 +19,6 @@ namespace Iscore.WebSite.Controllers
         #region LookUp
         public ActionResult LookUp()
         {
-
             return View();
         }
 
@@ -30,14 +29,14 @@ namespace Iscore.WebSite.Controllers
             {
                 using (var db = SiteUtil.NewDb)
                 {
-                    var lookup = db.LookUps.Where(x => x.IsActive.Value).Select(x => new { Id = x.Id, EntityName = x.EntityName, Code = x.Code, Description = x.Description }).ToList();
+                    var lookup = db.LookUps.Where(x => x.IsActive.Value).OrderBy(x => x.EntityName).Select(x => new { Id = x.Id, EntityName = x.EntityName, Code = x.Code, Description = x.Description }).ToList();
 
                     return Json(new { data = lookup }, JsonRequestBehavior.AllowGet);
                 }
             }
             catch (Exception e)
             {
-
+                return null;
                 throw;
             }
         }
@@ -78,6 +77,29 @@ namespace Iscore.WebSite.Controllers
 
                     }
 
+                    db.SaveChanges();
+                    return Json(new { Success = true });
+                }
+            }
+            catch (Exception e)
+            {
+                return Json(new { Success = false, ErrorMessage = e.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult DisableLookUp(int id)
+        {
+            try
+            {
+                using (var db = SiteUtil.NewDb)
+                {
+                    var lookup = db.LookUps.Where(x => x.IsActive.Value && x.Id == id).FirstOrDefault();
+
+                    lookup.UpdatedBy = "Admin";
+                    lookup.UpdatedOn = DateTime.Now;
+                    lookup.IsActive = false;
+                    
                     //db.SaveChanges();
                     return Json(new { Success = true });
                 }
@@ -88,7 +110,31 @@ namespace Iscore.WebSite.Controllers
             }
         }
         #endregion
+
+        public ActionResult Brand()
+        {
+            return View();
+        }
+
+        public JsonResult GetAllBrands()
+        {
+            try
+            {
+                using (var db = SiteUtil.NewDb)
+                {
+                    //var lookup = db.LookUps.Where(x => x.IsActive.Value).OrderBy(x => x.EntityName).Select(x => new { Id = x.Id, EntityName = x.EntityName, Code = x.Code, Description = x.Description }).ToList();
+
+                    return Json(new { data = "" }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception e)
+            {
+                return null;
+                throw;
+            }
+        }
+
     }
 
-    
+
 }
