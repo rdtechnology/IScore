@@ -195,24 +195,25 @@
         var entityNameTextbox = $("#entityNameTextBox").dxTextBox({}).dxTextBox("instance");
         entityNameTextbox.option("value", data.EntityName);
 
-        var descriptionNameTextbox = $("#descriptionTextBox").dxTextArea({}).dxTextBox("instance");
+        var descriptionNameTextbox = $("#descriptionTextBox").dxTextArea({}).dxTextArea("instance");
         descriptionNameTextbox.option("value", data.Description);
 
         $("#lookupId").val(data.Id);
     }
 
     function saveLookUp() {
-        var codeTextbox = $("#codeTextBox").dxTextBox({}).dxTextBox("instance");
-        var code = codeTextbox.option("value");
 
+        var codeTextbox = $("#codeTextBox").dxTextBox("instance");
+        var code = codeTextbox.option("value");
+        
         var entityNameTextbox = $("#entityNameTextBox").dxTextBox({}).dxTextBox("instance");
         var entityName = entityNameTextbox.option("value");
 
-        var descriptionNameTextbox = $("#descriptionTextBox").dxTextArea({}).dxTextBox("instance");
+        var descriptionNameTextbox = $("#descriptionTextBox").dxTextArea({}).dxTextArea("instance");
         var description = descriptionNameTextbox.option("value");
 
         var Id = $("#lookupId").val() == "" ? 0 : $("#lookupId").val();
-        console.log(Id);
+        
         $.ajax({
             url: "@Url.Action("AddEditLookUps", "Admin")",
             type: "POST",

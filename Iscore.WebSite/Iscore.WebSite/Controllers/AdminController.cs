@@ -16,7 +16,7 @@ namespace Iscore.WebSite.Controllers
             return View();
         }
 
-        #region LookUp
+        #region LookUp functions
         public ActionResult LookUp()
         {
             return View();
@@ -74,7 +74,6 @@ namespace Iscore.WebSite.Controllers
                         lookup.UpdatedBy = "Admin";
                         lookup.UpdatedOn = DateTime.Now;
                         lookup.IsActive = true;
-
                     }
 
                     db.SaveChanges();
@@ -111,20 +110,22 @@ namespace Iscore.WebSite.Controllers
         }
         #endregion
 
+        #region Brand functions
         public ActionResult Brand()
         {
             return View();
         }
 
-        public JsonResult GetAllBrands()
+        [HttpGet]
+        public JsonResult GetAllBrands(string condition)
         {
             try
             {
                 using (var db = SiteUtil.NewDb)
                 {
-                    //var lookup = db.LookUps.Where(x => x.IsActive.Value).OrderBy(x => x.EntityName).Select(x => new { Id = x.Id, EntityName = x.EntityName, Code = x.Code, Description = x.Description }).ToList();
+                    var brands = db.Brands.OrderByDescending(x => x.IsActive).ToList();
 
-                    return Json(new { data = "" }, JsonRequestBehavior.AllowGet);
+                    return Json(new { data = brands }, JsonRequestBehavior.AllowGet);
                 }
             }
             catch (Exception e)
@@ -134,6 +135,80 @@ namespace Iscore.WebSite.Controllers
             }
         }
 
+        [HttpPost]
+        public JsonResult AddEditBrand(int id, BrandModel brand)
+        {
+            try
+            {
+                using (var db = SiteUtil.NewDb)
+                {
+                    if (brand.Id == 0)
+                    {
+                        var newBrand = new Brand
+                        {
+                            Code = brand.code,
+                            Name = brand.name,
+                            Description = brand.description,
+                            IsActive = true,
+                            CreatedBy = "Admin",
+                            CreatedOn = DateTime.Now,
+                            UpdatedBy = "Admin",
+                            UpdatedOn = DateTime.Now
+                        };
+                        db.Brands.Add(newBrand);
+                    }
+                    else
+                    {
+                        var oldBrands = db.Brands.Where(x => x.Id == brand.Id).FirstOrDefault();
+                        oldBrands.Code = brand.code;
+                        oldBrands.Description = brand.description;
+                        oldBrands.Name = brand.name;
+                        oldBrands.IsActive = true;
+                        oldBrands.UpdatedBy = "Admin";
+                        oldBrands.UpdatedOn = DateTime.Now;
+                    }
+
+                    db.SaveChanges();
+                    return Json(new { Success = true });
+                }
+            }
+            catch (Exception e)
+            {
+                return Json(new { Success = false, ErrorMessage = e.Message });
+                throw;
+            }
+        }
+
+        [HttpPost]
+        public JsonResult DisableBrand(int id)
+        {
+            try
+            {
+                using (var db = SiteUtil.NewDb)
+                {
+                    var brand = db.Brands.Where(x => x.IsActive.Value && x.Id == id).FirstOrDefault();
+
+                    if (brand != null)
+                    {
+                        brand.UpdatedBy = "Admin";
+                        brand.UpdatedOn = DateTime.Now;
+                        brand.IsActive = false;
+
+                        db.SaveChanges();
+                        return Json(new { Success = true });
+                    }
+                    else
+                    {
+                        return Json(new { Success = false, ErrorMessage = "Brand can not Disable. There are some products still using current Brand." });
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                return Json(new { Success = false, ErrorMessage = e.Message });
+            }
+        } 
+        #endregion
     }
 
 

@@ -7,6 +7,17 @@
 <h2>Brand</h2>
 
 <div id="brandGrid"></div>
+<div id="brandContainer">
+    <div data-options="dxTemplate: { name: 'brandTemplate' }">
+        <form id="brandWholeForm">
+            <div id="brandForm"></div>
+            <div style="margin-top: 15px;float: right;">
+                <div id="saveButton"></div>
+                <div id="cancelButton"></div>
+            </div>
+        </form>
+    </div>
+</div>
 
 
 <script type="text/javascript">
@@ -15,11 +26,12 @@
         var brandStore = new DevExpress.data.CustomStore({
             load: function (loadOptions) {
                 var deferred = $.Deferred();
-
+                
                 $.ajax({
                     url: "@Url.Action("GetAllBrands", "Admin")",
                     success: function (result) {
                         deferred.resolve(result.data, { totalCount: result.totalCount });
+                        console.log(result.data);
                     },
                     error: function (e) {
                         deferred.reject("Data Loading Error");
@@ -55,6 +67,8 @@
                     method: "POST",
                     data: { id: key },
                     success: function (result) {
+                        DevExpress.ui.notify("Insert is Successful.", "success", 3000);
+                        refreshDataGgrid();
                         deferred.resolve(key);
                     },
                     error: function (e) {
@@ -71,11 +85,14 @@
                 $.ajax({
                     url: "@Url.Action("AddEditBrand", "Admin")",
                     method: "POST",
-                    data: { id: key },
+                    data: { id: key, brand: values },
                     success: function (result) {
+                        DevExpress.ui.notify("Updating is Successful.", "success", 3000);
+                        refreshDataGgrid();
                         deferred.resolve(key);
                     },
                     error: function (e) {
+                        DevExpress.ui.notify(e.ErrorMessage, "error", 3000);
                         deferred.reject("Data Loading Error");
                     },
                 });
@@ -91,6 +108,8 @@
                     method: "POST",
                     data: { id: key },
                     success: function (result) {
+                        DevExpress.ui.notify("Remove is Successful.", "success", 3000);
+                        refreshDataGgrid();
                         deferred.resolve(key);
                     },
                     error: function (e) {
@@ -121,23 +140,40 @@
                         $("<div />").dxButton({
                             text: "Edit",
                             onClick: function (e) {
-                                //showLookUpPopUp(options.data)
+                                showBrandPopUp(options.data)
                             }
                         }).appendTo(container);
 
-                        $("<div />").dxButton({
-                            text: "Disable",
-                            onClick: function (e) {
-                                //lookups.remove(options.data.Id);
-                                var result = DevExpress.ui.dialog.confirm("Are you sure?", "Disable");
-                                result.done(function (dialogResult) {
-                                    if (dialogResult)
-                                        DevExpress.ui.notify("Confirmed", "success", 2000);
-                                    else
-                                        DevExpress.ui.notify("Canceled", "error", 2000);
-                                });
-                            }
-                        }).appendTo(container);
+                        if (!options.data.IsActive) {
+                            $("<div />").dxButton({
+                                text: "Enable",
+                                onClick: function (e) {
+                                    //lookups.remove(options.data.Id);
+                                    var result = DevExpress.ui.dialog.confirm("Are you sure?", "Enable " + options.data.Name);
+                                    result.done(function (dialogResult) {
+                                        if (dialogResult) {
+                                            brandStore.update(options.data.Id, options.data);
+                                            DevExpress.ui.notify("Confirmed", "success", 2000);
+                                        }
+                                    });
+                                }
+                            }).appendTo(container);
+                        }
+                        else {
+                            $("<div />").dxButton({
+                                text: "Disable",
+                                onClick: function (e) {
+                                    //lookups.remove(options.data.Id);
+                                    var result = DevExpress.ui.dialog.confirm("Are you sure?", "Disable " + options.data.Name);
+                                    result.done(function (dialogResult) {
+                                        if (dialogResult) {
+                                            brandStore.remove(options.data.Id);
+                                            //DevExpress.ui.notify("Confirmed", "success", 2000);
+                                        }
+                                    });
+                                }
+                            }).appendTo(container);
+                        }
                     }
                 }
             ],
@@ -152,15 +188,128 @@
                         icon: "add",
                         hint: "Add New Brand",
                         onClick: function (arg) {
-                            //showLookUpPopUp("")
+                            var newBrand = {
+                                "Id": 0,
+                                "Code": null,
+                                "Name": null,
+                                "Description": ""
+                            };
+                            showBrandPopUp(newBrand);
                         }
                     }
+                },
+                {
+                    widget: "dxSelectBox",
+                    location: "before",
+                    options: {
+                        width: 100,
+                        items: [{
+                            value: "All",
+                            text: "All"
+                        }, {
+                            value: "Enable",
+                            text: "Active"
+                        }, {
+                            value: "Disable",
+                            text: "InActive"
+                        }],
+                        displayExpr: "text",
+                        valueExpr: "value",
+                        value: "All",
+                        onValueChanged: function (e) {
+                            var dataGrid = $("#brandGrid").dxDataGrid("instance");
+
+                            if (e.value == "All")
+                                dataGrid.clearFilter();
+                            else if (e.value == "Enable")
+                                dataGrid.filter(["IsActive", "=", true]);
+                            else if (e.value == "Disable")
+                                dataGrid.filter(["IsActive", "=", false]);
+                        }
+                    },
                 });
 
             }
         }).dxDataGrid("instance");
 
+        $("#brandContainer").dxPopup({
+            title: "Brand",
+            width: 500,
+            height: 400,
+            dragEnabled: false,
+            closeOnOutsideClick: false,
+            contentTemplate: "brandTemplate",
+            onContentReady: function (e) {
+                var form = $("#brandForm").dxForm({
+                    readOnly: false,
+                    showColonAfterLabel: true,
+                    labelLocation: "top",
+                    minColWidth: 300,
+                    colCount: 1,
+                    items: [
+                        {
+                            dataField: "Id",
+                            visible: false
+                        },
+                        {
+                            dataField: 'Code',
+                            isRequired: true,
+                        },
+                        {
+                            dataField: 'Name',
+                            isRequired: true,
+                        },
+                        {
+                            dataField: "Description",
+                            editorType: "dxTextArea",
+                            editorOptions: {
+                                height: 90
+                            }
+                        },
+                    ],
+                    //onInitialized: onInitialized
+                }).dxForm("instance");
 
+                $("#saveButton").dxButton({
+                    text: "Save",
+                    onClick: function (e) {
+                        var result = $("#brandForm").dxForm("instance").validate();
+
+                        if (result.isValid) {
+                            var data = {
+                                "Id": $("#brandForm").dxForm("instance").option("formData").Id,
+                                "code": $("#brandForm").dxForm("instance").getEditor("Code").option("value"),
+                                "name": $("#brandForm").dxForm("instance").getEditor("Name").option("value"),
+                                "description": $("#brandForm").dxForm("instance").getEditor("Description").option("value"),
+                            };
+
+                            brandStore.update(data.Id, data);
+                            $("#brandContainer").dxPopup("hide");
+
+                        }
+                    }
+                });
+
+                $("#cancelButton").dxButton({
+                    text: "Cancel",
+                    onClick: function (e) {
+                        $("#brandContainer").dxPopup("hide");
+                    }
+                });
+            }
+        });
+
+        function showBrandPopUp(data) {
+            console.log(data);
+            $("#brandContainer").dxPopup("show");
+            $("#brandForm").dxForm("instance").option("formData", data);
+        }
+
+        function refreshDataGgrid()
+        {
+            var dataGrid = $("#brandGrid").dxDataGrid("instance");
+            dataGrid.refresh();
+        }
     });
 </script>
 

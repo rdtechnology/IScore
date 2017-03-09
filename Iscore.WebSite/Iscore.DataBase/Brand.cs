@@ -12,25 +12,17 @@ namespace Iscore.DataBase
     using System;
     using System.Collections.Generic;
     
-    public partial class Addresss
+    public partial class Brand
     {
         public int Id { get; set; }
-        public int ContactId { get; set; }
-        public int AddressType { get; set; }
-        public string StreetNumber { get; set; }
-        public string StreetAddress { get; set; }
-        public string Suburb { get; set; }
-        public string City { get; set; }
-        public string Country { get; set; }
-        public string PostCode { get; set; }
+        public string Code { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
         public Nullable<bool> IsActive { get; set; }
         public Nullable<System.DateTime> CreatedOn { get; set; }
         public string CreatedBy { get; set; }
         public Nullable<System.DateTime> UpdatedOn { get; set; }
         public string UpdatedBy { get; set; }
         public byte[] Version { get; set; }
-    
-        public virtual Contact Contact { get; set; }
-        public virtual LookUp LookUp { get; set; }
     }
 }

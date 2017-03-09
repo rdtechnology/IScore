@@ -13,6 +13,7 @@
         <AssociationConnector Association="DB_A0B186_IscoreModel.FK_Addresss_LookUp" ManuallyRouted="false" />
         <AssociationConnector Association="DB_A0B186_IscoreModel.FK_User_Contact" ManuallyRouted="false" />
         <AssociationConnector Association="DB_A0B186_IscoreModel.FK_User_LookUp" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="DB_A0B186_IscoreModel.Brand" Width="1.5" PointX="3.375" PointY="0.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

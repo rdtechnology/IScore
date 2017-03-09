@@ -60,6 +60,9 @@
     <Compile Include="Addresss.cs">
       <DependentUpon>Iscore.tt</DependentUpon>
     </Compile>
+    <Compile Include="Brand.cs">
+      <DependentUpon>Iscore.tt</DependentUpon>
+    </Compile>
     <Compile Include="Contact.cs">
       <DependentUpon>Iscore.tt</DependentUpon>
     </Compile>
