@@ -223,7 +223,7 @@ namespace Iscore.WebSite.Controllers
             {
                 using (var db = SiteUtil.NewDb)
                 {
-                    var brands = db.Brands.OrderByDescending(x => x.IsActive).ToList();
+                    var brands = db.Sizes.OrderByDescending(x => x.IsActive).ToList();
 
                     return Json(new { data = brands }, JsonRequestBehavior.AllowGet);
                 }
@@ -236,36 +236,36 @@ namespace Iscore.WebSite.Controllers
         }
 
         [HttpPost]
-        public JsonResult AddEditBrand(int id, BrandModel brand)
+        public JsonResult AddEditSize(int id, SizeModel size)
         {
             try
             {
                 using (var db = SiteUtil.NewDb)
                 {
-                    if (brand.Id == 0)
+                    if (size.Id == 0)
                     {
-                        var newBrand = new Brand
+                        var newSize = new Size
                         {
-                            Code = brand.code,
-                            Name = brand.name,
-                            Description = brand.description,
+                            Code = size.code,
+                            Name = size.name,
+                            Description = size.description,
                             IsActive = true,
                             CreatedBy = "Admin",
                             CreatedOn = DateTime.Now,
                             UpdatedBy = "Admin",
                             UpdatedOn = DateTime.Now
                         };
-                        db.Brands.Add(newBrand);
+                        db.Sizes.Add(newSize);
                     }
                     else
                     {
-                        var oldBrands = db.Brands.Where(x => x.Id == brand.Id).FirstOrDefault();
-                        oldBrands.Code = brand.code;
-                        oldBrands.Description = brand.description;
-                        oldBrands.Name = brand.name;
-                        oldBrands.IsActive = true;
-                        oldBrands.UpdatedBy = "Admin";
-                        oldBrands.UpdatedOn = DateTime.Now;
+                        var oldSize = db.Sizes.Where(x => x.Id == size.Id).FirstOrDefault();
+                        oldSize.Code = size.code;
+                        oldSize.Description = size.description;
+                        oldSize.Name = size.name;
+                        oldSize.IsActive = true;
+                        oldSize.UpdatedBy = "Admin";
+                        oldSize.UpdatedOn = DateTime.Now;
                     }
 
                     db.SaveChanges();
@@ -280,26 +280,126 @@ namespace Iscore.WebSite.Controllers
         }
 
         [HttpPost]
-        public JsonResult DisableBrand(int id)
+        public JsonResult DisableSize(int id)
         {
             try
             {
                 using (var db = SiteUtil.NewDb)
                 {
-                    var brand = db.Brands.Where(x => x.IsActive.Value && x.Id == id).FirstOrDefault();
+                    var size = db.Sizes.Where(x => x.IsActive.Value && x.Id == id).FirstOrDefault();
 
-                    if (brand != null)
+                    if (size != null)
                     {
-                        brand.UpdatedBy = "Admin";
-                        brand.UpdatedOn = DateTime.Now;
-                        brand.IsActive = false;
+                        size.UpdatedBy = "Admin";
+                        size.UpdatedOn = DateTime.Now;
+                        size.IsActive = false;
 
                         db.SaveChanges();
                         return Json(new { Success = true });
                     }
                     else
                     {
-                        return Json(new { Success = false, ErrorMessage = "Brand can not Disable. There are some products still using current Brand." });
+                        return Json(new { Success = false, ErrorMessage = "Size can not Disable. There are some products still using current Size." });
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                return Json(new { Success = false, ErrorMessage = e.Message });
+            }
+        }
+        #endregion
+
+        #region Color functions
+        public ActionResult Color()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public JsonResult GetAllColor()
+        {
+            try
+            {
+                using (var db = SiteUtil.NewDb)
+                {
+                    var brands = db.Colors.OrderByDescending(x => x.IsActive).ToList();
+
+                    return Json(new { data = brands }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception e)
+            {
+                return null;
+                throw;
+            }
+        }
+
+        [HttpPost]
+        public JsonResult AddEditColor(int id, ColorModel color)
+        {
+            try
+            {
+                using (var db = SiteUtil.NewDb)
+                {
+                    if (color.Id == 0)
+                    {
+                        var newColor = new Color
+                        {
+                            Code = color.code,
+                            Name = color.name,
+                            Description = color.description,
+                            IsActive = true,
+                            CreatedBy = "Admin",
+                            CreatedOn = DateTime.Now,
+                            UpdatedBy = "Admin",
+                            UpdatedOn = DateTime.Now
+                        };
+                        db.Colors.Add(newColor);
+                    }
+                    else
+                    {
+                        var oldColor = db.Colors.Where(x => x.Id == color.Id).FirstOrDefault();
+                        oldColor.Code = color.code;
+                        oldColor.Description = color.description;
+                        oldColor.Name = color.name;
+                        oldColor.IsActive = true;
+                        oldColor.UpdatedBy = "Admin";
+                        oldColor.UpdatedOn = DateTime.Now;
+                    }
+
+                    db.SaveChanges();
+                    return Json(new { Success = true });
+                }
+            }
+            catch (Exception e)
+            {
+                return Json(new { Success = false, ErrorMessage = e.Message });
+                throw;
+            }
+        }
+
+        [HttpPost]
+        public JsonResult DisableColor(int id)
+        {
+            try
+            {
+                using (var db = SiteUtil.NewDb)
+                {
+                    var color = db.Colors.Where(x => x.IsActive.Value && x.Id == id).FirstOrDefault();
+
+                    if (color != null)
+                    {
+                        color.UpdatedBy = "Admin";
+                        color.UpdatedOn = DateTime.Now;
+                        color.IsActive = false;
+
+                        db.SaveChanges();
+                        return Json(new { Success = true });
+                    }
+                    else
+                    {
+                        return Json(new { Success = false, ErrorMessage = "Color can not Disable. There are some products still using current Color." });
                     }
                 }
             }

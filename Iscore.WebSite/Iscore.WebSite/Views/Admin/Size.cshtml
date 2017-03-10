@@ -6,3 +6,291 @@
 
 <h2>Size</h2>
 
+<div id="sizeGrid"></div>
+<div id="sizeContainer">
+    <div data-options="dxTemplate: { name: 'sizeTemplate' }">
+        <div id="sizeForm"></div>
+        <div style="margin-top: 15px;float: right;">
+            <div id="saveButton"></div>
+            <div id="cancelButton"></div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var sizeStore = new DevExpress.data.CustomStore({
+            load: function (loadOptions) {
+                var deferred = $.Deferred();
+
+                $.ajax({
+                    url: "@Url.Action("GetAllSize", "Admin")",
+                    success: function (result) {
+                        deferred.resolve(result.data, { totalCount: result.totalCount });
+                        //console.log(result.data);
+                    },
+                    error: function (e) {
+                        deferred.reject("Data Loading Error");
+                    },
+                    timeout: 5000
+                });
+
+                return deferred.promise();
+            },
+
+            insert: function (values) {
+                var deferred = $.Deferred();
+
+                $.ajax({
+                    url: "@Url.Action("AddEditSize", "Admin")",
+                    method: "POST",
+                    data: { id: key },
+                    success: function (result) {
+                        DevExpress.ui.notify("Insert is Successful.", "success", 3000);
+                        refreshDataGgrid();
+                        deferred.resolve(key);
+                    },
+                    error: function (e) {
+                        deferred.reject("Data Loading Error");
+                    },
+                });
+
+                return deferred.promise();
+            },
+
+            update: function (key, values) {
+                var deferred = $.Deferred();
+
+                $.ajax({
+                    url: "@Url.Action("AddEditSize", "Admin")",
+                    method: "POST",
+                    data: { id: key, size: values },
+                    success: function (result) {
+                        DevExpress.ui.notify("Updating is Successful.", "success", 3000);
+                        refreshDataGgrid();
+                        deferred.resolve(key);
+                    },
+                    error: function (e) {
+                        DevExpress.ui.notify(e.ErrorMessage, "error", 3000);
+                        deferred.reject("Data Loading Error");
+                    },
+                });
+
+                return deferred.promise();
+            },
+
+            remove: function (key) {
+                var deferred = $.Deferred();
+
+                $.ajax({
+                    url: "@Url.Action("DisableSize", "Admin")",
+                    method: "POST",
+                    data: { id: key },
+                    success: function (result) {
+                        DevExpress.ui.notify("Remove is Successful.", "success", 3000);
+                        refreshDataGgrid();
+                        deferred.resolve(key);
+                    },
+                    error: function (e) {
+                        deferred.reject("Data Loading Error");
+                    },
+                });
+
+                return deferred.promise();
+            }
+        });
+
+        var dataGrid = $("#sizeGrid").dxDataGrid({
+            dataSource: {
+                store: sizeStore
+            },
+            columns: [
+                {
+                    dataField: "Id",
+                    visible: false
+                },
+                "Code",
+                "Name",
+                "Description",
+                {
+                    width: 200,
+                    alignment: "center",
+                    cellTemplate: function (container, options) {
+                        $("<div />").dxButton({
+                            text: "Edit",
+                            disabled: !options.data.IsActive,
+                            onClick: function (e) {
+                                showSizePopUp(options.data)
+                            }
+                        }).appendTo(container);
+
+                        if (!options.data.IsActive) {
+                            $("<div />").dxButton({
+                                text: "Enable",
+                                onClick: function (e) {
+                                    
+                                    var result = DevExpress.ui.dialog.confirm("Are you sure?", "Enable " + options.data.Name);
+                                    result.done(function (dialogResult) {
+                                        if (dialogResult) {
+                                            sizeStore.update(options.data.Id, options.data);
+                                            
+                                        }
+                                    });
+                                }
+                            }).appendTo(container);
+                        }
+                        else {
+                            $("<div />").dxButton({
+                                text: "Disable",
+                                onClick: function (e) {
+                                    //lookups.remove(options.data.Id);
+                                    var result = DevExpress.ui.dialog.confirm("Are you sure?", "Disable " + options.data.Name);
+                                    result.done(function (dialogResult) {
+                                        if (dialogResult) {
+                                            sizeStore.remove(options.data.Id);
+                                            //DevExpress.ui.notify("Confirmed", "success", 2000);
+                                        }
+                                    });
+                                }
+                            }).appendTo(container);
+                        }
+                    }
+                }
+            ],
+            onToolbarPreparing: function (e) {
+                var toolbarItems = e.toolbarOptions.items;
+
+                toolbarItems.unshift({
+                    widget: "dxButton",
+                    location: "before",
+                    options: {
+                        text: "New",
+                        icon: "add",
+                        hint: "Add New size",
+                        onClick: function (arg) {
+                            var newSize = {
+                                "Id": 0,
+                                "Code": null,
+                                "Name": null,
+                                "Description": ""
+                            };
+                            showSizePopUp(newSize);
+                        }
+                    }
+                },
+                {
+                    widget: "dxSelectBox",
+                    location: "before",
+                    options: {
+                        width: 100,
+                        items: [{
+                            value: "All",
+                            text: "All"
+                        }, {
+                            value: "Enable",
+                            text: "Active"
+                        }, {
+                            value: "Disable",
+                            text: "InActive"
+                        }],
+                        displayExpr: "text",
+                        valueExpr: "value",
+                        value: "All",
+                        onValueChanged: function (e) {
+                            var dataGrid = $("#sizeGrid").dxDataGrid("instance");
+
+                            if (e.value == "All")
+                                dataGrid.clearFilter();
+                            else if (e.value == "Enable")
+                                dataGrid.filter(["IsActive", "=", true]);
+                            else if (e.value == "Disable")
+                                dataGrid.filter(["IsActive", "=", false]);
+                        }
+                    },
+                });
+
+            }
+        }).dxDataGrid("instance");
+
+        $("#sizeContainer").dxPopup({
+            title: "Size",
+            width: 500,
+            height: 400,
+            dragEnabled: false,
+            closeOnOutsideClick: false,
+            contentTemplate: "sizeTemplate",
+            onContentReady: function (e) {
+                var form = $("#sizeForm").dxForm({
+                    readOnly: false,
+                    showColonAfterLabel: true,
+                    labelLocation: "top",
+                    minColWidth: 300,
+                    colCount: 1,
+                    items: [
+                        {
+                            dataField: "Id",
+                            visible: false
+                        },
+                        {
+                            dataField: 'Code',
+                            isRequired: true,
+                        },
+                        {
+                            dataField: 'Name',
+                            isRequired: true,
+                        },
+                        {
+                            dataField: "Description",
+                            editorType: "dxTextArea",
+                            editorOptions: {
+                                height: 90
+                            }
+                        },
+                    ],
+                    //onInitialized: onInitialized
+                }).dxForm("instance");
+
+                $("#saveButton").dxButton({
+                    text: "Save",
+                    onClick: function (e) {
+                        var result = $("#sizeForm").dxForm("instance").validate();
+
+                        if (result.isValid) {
+                            var data = {
+                                "Id": $("#sizeForm").dxForm("instance").option("formData").Id,
+                                "code": $("#sizeForm").dxForm("instance").getEditor("Code").option("value"),
+                                "name": $("#sizeForm").dxForm("instance").getEditor("Name").option("value"),
+                                "description": $("#sizeForm").dxForm("instance").getEditor("Description").option("value"),
+                            };
+
+                            sizeStore.update(data.Id, data);
+                            $("#sizeContainer").dxPopup("hide");
+
+                        }
+                    }
+                });
+
+                $("#cancelButton").dxButton({
+                    text: "Cancel",
+                    onClick: function (e) {
+                        $("#sizeContainer").dxPopup("hide");
+                    }
+                });
+            }
+        });
+
+        function showSizePopUp(data) {
+            console.log(data);
+            $("#sizeContainer").dxPopup("show");
+            $("#sizeForm").dxForm("instance").option("formData", data);
+        }
+
+        function refreshDataGgrid()
+        {
+            var dataGrid = $("#sizeGrid").dxDataGrid("instance");
+            dataGrid.refresh();
+        }
+    });
+</script>
