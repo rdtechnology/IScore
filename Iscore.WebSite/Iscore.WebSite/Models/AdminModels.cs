@@ -16,4 +16,21 @@ namespace Iscore.WebSite.Models
         public string name { get; set; }
         public string description { get; set; }
     }
+
+    public class SizeModel
+    {
+        public int? Id { get; set; }
+        public string code { get; set; }
+        public string name { get; set; }
+        public string description { get; set; }
+    }
+
+    public class ColorModel
+    {
+        public int? Id { get; set; }
+        public string code { get; set; }
+        public string name { get; set; }
+        public string description { get; set; }
+    }
+
 }
