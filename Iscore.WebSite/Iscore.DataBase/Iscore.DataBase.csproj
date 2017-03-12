@@ -63,6 +63,9 @@
     <Compile Include="Brand.cs">
       <DependentUpon>Iscore.tt</DependentUpon>
     </Compile>
+    <Compile Include="Category.cs">
+      <DependentUpon>Iscore.tt</DependentUpon>
+    </Compile>
     <Compile Include="Color.cs">
       <DependentUpon>Iscore.tt</DependentUpon>
     </Compile>

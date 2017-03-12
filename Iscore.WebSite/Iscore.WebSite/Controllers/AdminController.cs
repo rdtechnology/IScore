@@ -410,6 +410,143 @@ namespace Iscore.WebSite.Controllers
         }
         #endregion
 
+        #region Category functions
+        public ActionResult Category()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public JsonResult GetAllCategory()
+        {
+            try
+            {
+                using (var db = SiteUtil.NewDb)
+                {
+                    var category = db.Categories.OrderByDescending(x => x.IsActive).Select(x => new {
+                        Id = x.Id,
+                        ParentCategoryId = x.ParentCategoryId,
+                        ParentCategory = x.Category2.Name,
+                        Name = x.Name,
+                        Description = x.Description,
+                        Position = x.Position,
+                        IsActive = x.IsActive,
+                        IsParent = x.IsParent,
+                    }).ToList();
+
+                    return Json(new { data = category }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception e)
+            {
+                return null;
+                throw;
+            }
+        }
+
+        public JsonResult GetAllActiveCategory()
+        {
+            try
+            {
+                using (var db = SiteUtil.NewDb)
+                {
+                    var category = db.Categories.Where(x => x.IsActive.Value).Select(x => new {
+                        Id = x.Id,
+                        ParentCategoryId = x.ParentCategoryId,
+                        Name = x.Name,
+                        Description = x.Description,
+                        Position = x.Position,
+                        IsParent = x.IsParent,
+                    }).ToList();
+
+                    return Json(new { data = category }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception e)
+            {
+                return null;
+                throw;
+            }
+        }
+
+        [HttpPost]
+        public JsonResult AddEditCategory(int id, CategoryModel category)
+        {
+            try
+            {
+                using (var db = SiteUtil.NewDb)
+                {
+                    if (category.Id == 0)
+                    {
+                        var newCategory = new Category
+                        {
+                            IsParent = category.isParent,
+                            ParentCategoryId = category.parentCatId,
+                            Name = category.name,
+                            Description = category.description,
+                            IsActive = true,
+                            CreatedBy = "Admin",
+                            CreatedOn = DateTime.Now,
+                            UpdatedBy = "Admin",
+                            UpdatedOn = DateTime.Now
+                        };
+                        db.Categories.Add(newCategory);
+                    }
+                    else
+                    {
+                        var oldCategory = db.Categories.Where(x => x.Id == category.Id).FirstOrDefault();
+                        oldCategory.ParentCategoryId = category.parentCatId;
+                        oldCategory.IsParent = category.isParent;
+                        oldCategory.Description = category.description;
+                        oldCategory.Name = category.name;
+                        oldCategory.IsActive = true;
+                        oldCategory.UpdatedBy = "Admin";
+                        oldCategory.UpdatedOn = DateTime.Now;
+                    }
+
+                    db.SaveChanges();
+                    return Json(new { Success = true });
+                }
+            }
+            catch (Exception e)
+            {
+                return Json(new { Success = false, ErrorMessage = e.Message });
+                throw;
+            }
+        }
+
+        [HttpPost]
+        public JsonResult DisableCategory(int id)
+        {
+            try
+            {
+                using (var db = SiteUtil.NewDb)
+                {
+                    var category = db.Categories.Where(x => x.IsActive.Value && x.Id == id).FirstOrDefault();
+
+                    if (category != null)
+                    {
+                        category.UpdatedBy = "Admin";
+                        category.UpdatedOn = DateTime.Now;
+                        category.IsActive = false;
+
+                        db.SaveChanges();
+                        return Json(new { Success = true });
+                    }
+                    else
+                    {
+                        return Json(new { Success = false, ErrorMessage = "Category can not Disable. There are some products still using current Category." });
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                return Json(new { Success = false, ErrorMessage = e.Message });
+            }
+        }
+        #endregion
+
+
     }
 
 

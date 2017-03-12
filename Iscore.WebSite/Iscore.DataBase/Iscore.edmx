@@ -40,6 +40,23 @@
           <Property Name="UpdatedBy" Type="nvarchar" MaxLength="50" />
           <Property Name="Version" Type="timestamp" StoreGeneratedPattern="Computed" />
         </EntityType>
+        <EntityType Name="Category">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ParentCategoryId" Type="int" />
+          <Property Name="IsParent" Type="bit" />
+          <Property Name="Name" Type="varchar" MaxLength="50" />
+          <Property Name="Position" Type="int" />
+          <Property Name="Description" Type="varchar(max)" />
+          <Property Name="IsActive" Type="bit" />
+          <Property Name="CreatedOn" Type="datetime" />
+          <Property Name="CreatedBy" Type="nvarchar" MaxLength="50" />
+          <Property Name="UpdatedOn" Type="datetime" />
+          <Property Name="UpdatedBy" Type="nvarchar" MaxLength="50" />
+          <Property Name="Version" Type="timestamp" StoreGeneratedPattern="Computed" />
+        </EntityType>
         <EntityType Name="Color">
           <Key>
             <PropertyRef Name="Id" />
@@ -147,6 +164,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_Cartegory_Cartegory">
+          <End Role="Category" Type="Self.Category" Multiplicity="0..1" />
+          <End Role="Category1" Type="Self.Category" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Category">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Category1">
+              <PropertyRef Name="ParentCategoryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_User_Contact">
           <End Role="Contact" Type="Self.Contact" Multiplicity="1" />
           <End Role="User" Type="Self.User" Multiplicity="*" />
@@ -174,6 +203,7 @@
         <EntityContainer Name="DB_A0B186_IscoreModelStoreContainer">
           <EntitySet Name="Addresss" EntityType="Self.Addresss" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Brand" EntityType="Self.Brand" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Category" EntityType="Self.Category" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Color" EntityType="Self.Color" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Contact" EntityType="Self.Contact" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="LookUp" EntityType="Self.LookUp" Schema="dbo" store:Type="Tables" />
@@ -186,6 +216,10 @@
           <AssociationSet Name="FK_Addresss_LookUp" Association="Self.FK_Addresss_LookUp">
             <End Role="LookUp" EntitySet="LookUp" />
             <End Role="Addresss" EntitySet="Addresss" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Cartegory_Cartegory" Association="Self.FK_Cartegory_Cartegory">
+            <End Role="Category" EntitySet="Category" />
+            <End Role="Category1" EntitySet="Category" />
           </AssociationSet>
           <AssociationSet Name="FK_User_Contact" Association="Self.FK_User_Contact">
             <End Role="Contact" EntitySet="Contact" />
@@ -353,6 +387,11 @@
           <EntitySet Name="Brands" EntityType="DB_A0B186_IscoreModel.Brand" />
           <EntitySet Name="Colors" EntityType="DB_A0B186_IscoreModel.Color" />
           <EntitySet Name="Sizes" EntityType="DB_A0B186_IscoreModel.Size" />
+          <EntitySet Name="Categories" EntityType="DB_A0B186_IscoreModel.Category" />
+          <AssociationSet Name="FK_Cartegory_Cartegory" Association="DB_A0B186_IscoreModel.FK_Cartegory_Cartegory">
+            <End Role="Category" EntitySet="Categories" />
+            <End Role="Category1" EntitySet="Categories" />
+          </AssociationSet>
         </EntityContainer>
         <EntityType Name="Brand">
           <Key>
@@ -399,6 +438,37 @@
           <Property Name="UpdatedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
           <Property Name="Version" Type="Binary" MaxLength="8" FixedLength="true" annotation:StoreGeneratedPattern="Computed" />
         </EntityType>
+        <EntityType Name="Category">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ParentCategoryId" Type="Int32" />
+          <Property Name="IsParent" Type="Boolean" />
+          <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Position" Type="Int32" />
+          <Property Name="Description" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
+          <Property Name="IsActive" Type="Boolean" />
+          <Property Name="CreatedOn" Type="DateTime" Precision="3" />
+          <Property Name="CreatedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="UpdatedOn" Type="DateTime" Precision="3" />
+          <Property Name="UpdatedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Version" Type="Binary" MaxLength="8" FixedLength="true" annotation:StoreGeneratedPattern="Computed" />
+          <NavigationProperty Name="Category1" Relationship="DB_A0B186_IscoreModel.FK_Cartegory_Cartegory" FromRole="Category" ToRole="Category1" />
+          <NavigationProperty Name="Category2" Relationship="DB_A0B186_IscoreModel.FK_Cartegory_Cartegory" FromRole="Category1" ToRole="Category" />
+        </EntityType>
+        <Association Name="FK_Cartegory_Cartegory">
+          <End Type="DB_A0B186_IscoreModel.Category" Role="Category" Multiplicity="0..1" />
+          <End Type="DB_A0B186_IscoreModel.Category" Role="Category1" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Category">
+              <PropertyRef Name="Id" />
+            </Principal>
+            <Dependent Role="Category1">
+              <PropertyRef Name="ParentCategoryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
       </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -526,6 +596,24 @@
                 <ScalarProperty Name="Description" ColumnName="Description" />
                 <ScalarProperty Name="Name" ColumnName="Name" />
                 <ScalarProperty Name="Code" ColumnName="Code" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Categories">
+            <EntityTypeMapping TypeName="DB_A0B186_IscoreModel.Category">
+              <MappingFragment StoreEntitySet="Category">
+                <ScalarProperty Name="Version" ColumnName="Version" />
+                <ScalarProperty Name="UpdatedBy" ColumnName="UpdatedBy" />
+                <ScalarProperty Name="UpdatedOn" ColumnName="UpdatedOn" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="CreatedOn" ColumnName="CreatedOn" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="Position" ColumnName="Position" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="IsParent" ColumnName="IsParent" />
+                <ScalarProperty Name="ParentCategoryId" ColumnName="ParentCategoryId" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
             </EntityTypeMapping>

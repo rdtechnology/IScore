@@ -33,4 +33,15 @@ namespace Iscore.WebSite.Models
         public string description { get; set; }
     }
 
+    public class CategoryModel
+    {
+        public int? Id { get; set; }
+        public int? parentCatId { get; set; }
+        public int? position { get; set; }
+        public bool isParent { get; set; }
+        public string name { get; set; }
+        public string description { get; set; }
+    }
+
+
 }

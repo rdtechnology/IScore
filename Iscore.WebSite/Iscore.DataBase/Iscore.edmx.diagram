@@ -16,6 +16,8 @@
         <EntityTypeShape EntityType="DB_A0B186_IscoreModel.Brand" Width="1.5" PointX="3.375" PointY="0.75" />
         <EntityTypeShape EntityType="DB_A0B186_IscoreModel.Color" Width="1.5" PointX="5.375" PointY="0.75" />
         <EntityTypeShape EntityType="DB_A0B186_IscoreModel.Size" Width="1.5" PointX="7.375" PointY="0.75" />
+        <EntityTypeShape EntityType="DB_A0B186_IscoreModel.Category" Width="1.5" PointX="8.375" PointY="4.75" />
+        <AssociationConnector Association="DB_A0B186_IscoreModel.FK_Cartegory_Cartegory" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>
