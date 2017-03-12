@@ -69,9 +69,6 @@
     <Compile Include="Color.cs">
       <DependentUpon>Iscore.tt</DependentUpon>
     </Compile>
-    <Compile Include="Contact.cs">
-      <DependentUpon>Iscore.tt</DependentUpon>
-    </Compile>
     <Compile Include="Iscore.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -95,6 +92,9 @@
       <DependentUpon>Iscore.tt</DependentUpon>
     </Compile>
     <Compile Include="User.cs">
+      <DependentUpon>Iscore.tt</DependentUpon>
+    </Compile>
+    <Compile Include="UserLogin.cs">
       <DependentUpon>Iscore.tt</DependentUpon>
     </Compile>
   </ItemGroup>

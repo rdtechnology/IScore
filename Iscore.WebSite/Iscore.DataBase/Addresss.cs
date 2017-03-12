@@ -15,8 +15,8 @@ namespace Iscore.DataBase
     public partial class Addresss
     {
         public int Id { get; set; }
-        public int ContactId { get; set; }
-        public int AddressType { get; set; }
+        public int UserId { get; set; }
+        public int AddressTypeId { get; set; }
         public string StreetNumber { get; set; }
         public string StreetAddress { get; set; }
         public string Suburb { get; set; }
@@ -30,7 +30,7 @@ namespace Iscore.DataBase
         public string UpdatedBy { get; set; }
         public byte[] Version { get; set; }
     
-        public virtual Contact Contact { get; set; }
         public virtual LookUp LookUp { get; set; }
+        public virtual User User { get; set; }
     }
 }

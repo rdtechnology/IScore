@@ -26,12 +26,12 @@ namespace Iscore.DataBase
         }
     
         public virtual DbSet<Addresss> Addressses { get; set; }
-        public virtual DbSet<Contact> Contacts { get; set; }
-        public virtual DbSet<LookUp> LookUps { get; set; }
-        public virtual DbSet<User> Users { get; set; }
         public virtual DbSet<Brand> Brands { get; set; }
-        public virtual DbSet<Color> Colors { get; set; }
-        public virtual DbSet<Size> Sizes { get; set; }
         public virtual DbSet<Category> Categories { get; set; }
+        public virtual DbSet<Color> Colors { get; set; }
+        public virtual DbSet<LookUp> LookUps { get; set; }
+        public virtual DbSet<Size> Sizes { get; set; }
+        public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<UserLogin> UserLogins { get; set; }
     }
 }

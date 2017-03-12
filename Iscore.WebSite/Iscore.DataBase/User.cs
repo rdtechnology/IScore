@@ -14,14 +14,24 @@ namespace Iscore.DataBase
     
     public partial class User
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public User()
+        {
+            this.Addressses = new HashSet<Addresss>();
+        }
+    
         public int Id { get; set; }
-        public int ContactId { get; set; }
+        public int LoginId { get; set; }
         public int RoleId { get; set; }
-        public string UserName { get; set; }
-        public string Password { get; set; }
-        public string PasswordHash { get; set; }
-        public Nullable<bool> CanLogin { get; set; }
-        public Nullable<int> RetryAttempt { get; set; }
+        public string Name { get; set; }
+        public string FirstName { get; set; }
+        public string MiddleName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public string LandLine { get; set; }
+        public string Mobile { get; set; }
+        public string Fax { get; set; }
+        public string WebSite { get; set; }
         public Nullable<System.DateTime> CreatedOn { get; set; }
         public string CreatedBy { get; set; }
         public Nullable<System.DateTime> UpdatedOn { get; set; }
@@ -29,7 +39,9 @@ namespace Iscore.DataBase
         public Nullable<bool> IsActive { get; set; }
         public byte[] Version { get; set; }
     
-        public virtual Contact Contact { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Addresss> Addressses { get; set; }
         public virtual LookUp LookUp { get; set; }
+        public virtual UserLogin UserLogin { get; set; }
     }
 }
