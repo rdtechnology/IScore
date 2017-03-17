@@ -546,6 +546,111 @@ namespace Iscore.WebSite.Controllers
         }
         #endregion
 
+        #region User functions
+        public ActionResult User()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public JsonResult GetUsers()
+        {
+            try
+            {
+                using (var db = SiteUtil.NewDb)
+                {
+                    var users = db.Users.Where(x => x.IsActive.Value).ToList();
+
+                    return Json(new { data = users }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            catch (Exception e)
+            {
+                return null;
+                throw;
+            }
+        }
+
+        [HttpPost]
+        public JsonResult AddEditUser(int id, UserModel user)
+        {
+            try
+            {
+                using (var db = SiteUtil.NewDb)
+                {
+                    // add new lookup
+                    if (id == 0)
+                    {
+                        var newUser = new User()
+                        {
+                            Name = user.name,
+                            FirstName = user.firstname,
+                            MiddleName = user.middlename,
+                            LastName = user.lastname,
+                            Email = user.email,
+                            WebSite = user.website,
+                            LandLine = user.landline,
+                            Mobile = user.mobile,
+                            Fax = user.fax,
+                            CreatedBy = "Admin",
+                            CreatedOn = DateTime.Now,
+                            UpdatedBy = "Admin",
+                            UpdatedOn = DateTime.Now,
+                            IsActive = true
+                        };
+                        db.Users.Add(newUser);
+                    }
+                    // edit lookup
+                    else
+                    {
+                        var oldUser = db.Users.Where(x => x.IsActive.Value && x.Id == id).FirstOrDefault();
+                        oldUser.Name = user.name;
+                        oldUser.FirstName = user.firstname;
+                        oldUser.MiddleName = user.middlename;
+                        oldUser.LastName = user.lastname;
+                        oldUser.Email = user.email;
+                        oldUser.WebSite = user.website;
+                        oldUser.LandLine = user.landline;
+                        oldUser.Mobile = user.mobile;
+                        oldUser.Fax = user.fax;
+                        oldUser.UpdatedBy = "Admin";
+                        oldUser.UpdatedOn = DateTime.Now;
+                        oldUser.IsActive = true;
+                    }
+
+                    db.SaveChanges();
+                    return Json(new { Success = true });
+                }
+            }
+            catch (Exception e)
+            {
+                return Json(new { Success = false, ErrorMessage = e.Message });
+            }
+        }
+
+        [HttpPost]
+        public JsonResult DisableUser(int id)
+        {
+            try
+            {
+                using (var db = SiteUtil.NewDb)
+                {
+                    var user = db.Users.Where(x => x.IsActive.Value && x.Id == id).FirstOrDefault();
+
+                    user.UpdatedBy = "Admin";
+                    user.UpdatedOn = DateTime.Now;
+                    user.IsActive = false;
+
+                    //db.SaveChanges();
+                    return Json(new { Success = true });
+                }
+            }
+            catch (Exception e)
+            {
+                return Json(new { Success = false, ErrorMessage = e.Message });
+            }
+        }
+        #endregion
 
     }
 

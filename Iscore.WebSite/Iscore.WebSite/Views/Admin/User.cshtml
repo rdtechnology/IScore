@@ -1,0 +1,325 @@
+﻿
+@{
+    ViewBag.Title = "User";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h2>User</h2>
+
+<div id="userGrid"></div>
+<div id="userContainer">
+    <div data-options="dxTemplate: { name: 'userTemplate' }">
+        <div id="userForm"></div>
+        <div style="margin-top: 15px;float: right;">
+            <div id="saveButton"></div>
+            <div id="cancelButton"></div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var userStore = new DevExpress.data.CustomStore({
+            load: function (loadOptions) {
+                var deferred = $.Deferred();
+
+                $.ajax({
+                    url: "@Url.Action("GetUsers", "Admin")",
+                    success: function (result) {
+                        console.log(result);
+                        deferred.resolve(result.data, { totalCount: result.totalCount });
+
+                    },
+                    error: function (e) {
+                        console.log(e);
+                        deferred.reject("Data Loading Error");
+                    },
+                    timeout: 5000
+                });
+
+                return deferred.promise();
+            },
+
+            insert: function (values) {
+                var deferred = $.Deferred();
+
+                $.ajax({
+                    url: "@Url.Action("AddEditUser", "Admin")",
+                    method: "POST",
+                    data: { id: key },
+                    success: function (result) {
+                        DevExpress.ui.notify("Insert is Successful.", "success", 3000);
+                        refreshDataGgrid();
+                        deferred.resolve(key);
+                    },
+                    error: function (e) {
+                        deferred.reject("Data Loading Error");
+                    },
+                });
+
+                return deferred.promise();
+            },
+
+            update: function (key, values) {
+                var deferred = $.Deferred();
+
+                $.ajax({
+                    url: "@Url.Action("AddEditUser", "Admin")",
+                    method: "POST",
+                    data: { id: key, user: values },
+                    success: function (result) {
+                        DevExpress.ui.notify("Updating is Successful.", "success", 3000);
+                        refreshDataGgrid();
+                        deferred.resolve(key);
+                    },
+                    error: function (e) {
+                        DevExpress.ui.notify(e.ErrorMessage, "error", 3000);
+                        deferred.reject("Data Loading Error");
+                    },
+                });
+
+                return deferred.promise();
+            },
+
+            remove: function (key) {
+                var deferred = $.Deferred();
+
+                $.ajax({
+                    url: "@Url.Action("DisableUser", "Admin")",
+                    method: "POST",
+                    data: { id: key },
+                    success: function (result) {
+                        DevExpress.ui.notify("Remove is Successful.", "success", 3000);
+                        refreshDataGgrid();
+                        deferred.resolve(key);
+                    },
+                    error: function (e) {
+                        deferred.reject("Data Loading Error");
+                    },
+                });
+
+                return deferred.promise();
+            }
+        });
+
+        var dataGrid = $("#userGrid").dxDataGrid({
+            dataSource: {
+                store: userStore
+            },
+            columns: [
+                {
+                    dataField: "Id",
+                    visible: false
+                },
+                "Name",
+                "FirstName",
+                "LastName",
+                "Email",
+                "Role",
+                {
+                    width: 200,
+                    alignment: "center",
+                    cellTemplate: function (container, options) {
+                        $("<div />").dxButton({
+                            text: "Edit",
+                            disabled: !options.data.IsActive,
+                            onClick: function (e) {
+                                showUserPopUp(options.data)
+                            }
+                        }).appendTo(container);
+
+                        if (!options.data.IsActive) {
+                            $("<div />").dxButton({
+                                text: "Enable",
+                                onClick: function (e) {
+                                    var result = DevExpress.ui.dialog.confirm("Are you sure?", "Enable " + options.data.Name);
+                                    result.done(function (dialogResult) {
+                                        if (dialogResult) {
+                                            userStore.update(options.data.Id, options.data);
+                                        }
+                                    });
+                                }
+                            }).appendTo(container);
+                        }
+                        else {
+                            $("<div />").dxButton({
+                                text: "Disable",
+                                onClick: function (e) {
+                                    var result = DevExpress.ui.dialog.confirm("Are you sure?", "Disable " + options.data.Name);
+                                    result.done(function (dialogResult) {
+                                        if (dialogResult) {
+                                            userStore.remove(options.data.Id);
+                                            //DevExpress.ui.notify("Confirmed", "success", 2000);
+                                        }
+                                    });
+                                }
+                            }).appendTo(container);
+                        }
+                    }
+                }
+            ],
+            onToolbarPreparing: function (e) {
+                var toolbarItems = e.toolbarOptions.items;
+
+                toolbarItems.unshift({
+                    widget: "dxButton",
+                    location: "before",
+                    options: {
+                        text: "New",
+                        icon: "add",
+                        hint: "Add New User",
+                        onClick: function (arg) {
+                            var newUser = {
+                                "Id": 0,
+                                "Position": 0,
+                                "Name": null,
+                                "Description": "",
+                                "ParentCategoryId": 0,
+                                "IsParent": true
+                            };
+                            showUserPopUp(newUser);
+                        }
+                    }
+                });
+
+            }
+        }).dxDataGrid("instance");
+
+        $("#userContainer").dxPopup({
+            title: "User",
+            width: 500,
+            height: 500,
+            dragEnabled: false,
+            closeOnOutsideClick: false,
+            contentTemplate: "userTemplate",
+            onContentReady: function (e) {
+                var form = $("#userForm").dxForm({
+                    readOnly: false,
+                    showColonAfterLabel: true,
+                    labelLocation: "top",
+                    minColWidth: 300,
+                    colCount: 2,
+                    items: [
+                        {
+                            dataField: "Id",
+                            visible: false
+                        },
+                        {
+                            itemType: "group",
+                            caption: "User Details",
+                            items: [
+                                 {
+                                     dataField: 'IsParent',
+                                     editorType: "dxCheckBox",
+                                     editorOptions: {
+                                         onValueChanged: function (data) {
+                                             setParentCategroy(data.value);
+                                         }
+                                     },
+                                 },
+                                 {
+                                     cssClass: "parentCategory",
+                                     caption: "Parent Category",
+                                     dataField: 'ParentCategoryId',
+                                     editorType: "dxSelectBox",
+                                     editorOptions: {
+                                         dataSource: categoryParentStore,
+                                         displayExpr: "Name",
+                                         valueExpr: "Id",
+                                         placeholder: "Please a Parent Category"
+                                     },
+                                     isRequired: true,
+                                 },
+                            ],
+                        },
+                        {
+                            itemType: "group",
+                            colCount: 2,
+                            items: [
+                                 {
+                                     dataField: 'IsParent',
+                                     editorType: "dxCheckBox",
+                                     editorOptions: {
+                                         onValueChanged: function (data) {
+                                             setParentCategroy(data.value);
+                                         }
+                                     },
+                                 },
+                                 {
+                                     cssClass: "parentCategory",
+                                     caption: "Parent Category",
+                                     dataField: 'ParentCategoryId',
+                                     editorType: "dxSelectBox",
+                                     editorOptions: {
+                                         dataSource: categoryParentStore,
+                                         displayExpr: "Name",
+                                         valueExpr: "Id",
+                                         placeholder: "Please a Parent Category"
+                                     },
+                                     isRequired: true,
+                                 },
+                            ],
+                        },
+                        {
+                            dataField: "Description",
+                            editorType: "dxTextArea",
+                            editorOptions: {
+                                height: 90
+                            }
+                        },
+                    ],
+                    //onInitialized: onInitialized
+                }).dxForm("instance");
+
+                $("#saveButton").dxButton({
+                    text: "Save",
+                    onClick: function (e) {
+                        var userForm = $("#userForm").dxForm("instance");
+                        var result = userForm.validate();
+
+                        if (result.isValid) {
+                            var data = {
+                                "Id": categoryForm.option("formData").Id,
+                                "isParent": categoryForm.getEditor("IsParent").option("value"),
+                                "name": categoryForm.getEditor("Name").option("value"),
+                                "description": categoryForm.getEditor("Description").option("value"),
+                                "parentCatId": categoryForm.getEditor("IsParent").option("value") == true ? null : categoryForm.getEditor("ParentCategoryId").option("value"),
+                            };
+                            console.log(data);
+                            userStore.update(data.Id, data);
+                            $("#userContainer").dxPopup("hide");
+
+                        }
+                    }
+                });
+
+                $("#cancelButton").dxButton({
+                    text: "Cancel",
+                    onClick: function (e) {
+                        $("#userContainer").dxPopup("hide");
+                    }
+                });
+            }
+        });
+
+        function showUserPopUp(data) {
+            $("#userContainer").dxPopup("show");
+            $("#userForm").dxForm("instance").option("formData", data);
+            //$("#categoryForm").dxForm("instance").getEditor("IsParent").option("value", data.IsParent);
+            //setParentCategroy(data.IsParent);
+        }
+
+        function refreshDataGgrid()
+        {
+            var dataGrid = $("#userGrid").dxDataGrid("instance");
+            dataGrid.refresh();
+        }
+
+        //function setParentCategroy(value)
+        //{
+        //    $("#categoryForm").dxForm("instance").getEditor("ParentCategoryId").option("disabled", value);
+        //}
+    });
+</script>
