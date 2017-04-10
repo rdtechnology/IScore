@@ -189,8 +189,8 @@
 
         $("#userContainer").dxPopup({
             title: "User",
-            width: 500,
-            height: 500,
+            width: 700,
+            height: 600,
             dragEnabled: false,
             closeOnOutsideClick: false,
             contentTemplate: "userTemplate",
@@ -199,75 +199,92 @@
                     readOnly: false,
                     showColonAfterLabel: true,
                     labelLocation: "top",
-                    minColWidth: 300,
+                    scrollingEnabled: true,
+                    height: 460,
+                    minColWidth: 200,
                     colCount: 2,
                     items: [
-                        {
-                            dataField: "Id",
-                            visible: false
-                        },
                         {
                             itemType: "group",
                             caption: "User Details",
                             items: [
-                                 {
-                                     dataField: 'IsParent',
-                                     editorType: "dxCheckBox",
-                                     editorOptions: {
-                                         onValueChanged: function (data) {
-                                             setParentCategroy(data.value);
-                                         }
-                                     },
-                                 },
-                                 {
-                                     cssClass: "parentCategory",
-                                     caption: "Parent Category",
-                                     dataField: 'ParentCategoryId',
-                                     editorType: "dxSelectBox",
-                                     editorOptions: {
-                                         dataSource: categoryParentStore,
-                                         displayExpr: "Name",
-                                         valueExpr: "Id",
-                                         placeholder: "Please a Parent Category"
-                                     },
-                                     isRequired: true,
-                                 },
+                                {
+                                    dataField: "Id",
+                                    visible: false
+                                },
+                                "Name",
+                                "FirstName",
+                                "MiddleName",
+                                "LastName",
+                                "Email",
+                                "LandLine",
+                                "Mobile",
+                                "Fax", 
                             ],
                         },
                         {
                             itemType: "group",
-                            colCount: 2,
                             items: [
-                                 {
-                                     dataField: 'IsParent',
-                                     editorType: "dxCheckBox",
-                                     editorOptions: {
-                                         onValueChanged: function (data) {
-                                             setParentCategroy(data.value);
-                                         }
-                                     },
-                                 },
-                                 {
-                                     cssClass: "parentCategory",
-                                     caption: "Parent Category",
-                                     dataField: 'ParentCategoryId',
-                                     editorType: "dxSelectBox",
-                                     editorOptions: {
-                                         dataSource: categoryParentStore,
-                                         displayExpr: "Name",
-                                         valueExpr: "Id",
-                                         placeholder: "Please a Parent Category"
-                                     },
-                                     isRequired: true,
-                                 },
-                            ],
+                                {
+                                    itemType: "group",
+                                    caption: "User Role",
+                                    items: [
+                                        {
+                                            cssClass: "parentCategory",
+                                            caption: "User Role",
+                                            dataField: 'ParentCategoryId',
+                                            editorType: "dxSelectBox",
+                                            editorOptions: {
+                                                dataSource: null,
+                                                displayExpr: "Role",
+                                                valueExpr: "Id",
+                                                placeholder: "Please a User Role"
+                                            },
+                                            isRequired: true,
+                                        },
+                                    ],
+                                },
+                                {
+                                    itemType: "group",
+                                    caption: "User Login",
+                                    items: [
+                                        "UserName",
+                                        "Password"
+                                    ],
+                                }
+                            ]
                         },
                         {
-                            dataField: "Description",
-                            editorType: "dxTextArea",
-                            editorOptions: {
-                                height: 90
-                            }
+                            itemType: "group",
+                            caption: "User Address",
+                            colSpan: 2,
+                            items: [{
+                                    editorType: "dxButton",
+                                    editorOptions: {
+                                        text: "Add New Address",
+                                        onClick: function (e) {
+
+                                        }
+                                    },
+                                },
+                                {
+                                itemType: "tabbed",
+                                tabPanelOptions: {
+                                    deferRendering: false
+                                },
+                                tabs: [{
+                                    title: "Address",
+                                    items: [
+                                        "Type",
+                                        "Name",
+                                        "Street Address",
+                                        "Suburb",
+                                        "City",
+                                        "Country",
+                                        "PostCode"
+                                    ]
+                                }]
+                            }]
                         },
                     ],
                     //onInitialized: onInitialized
